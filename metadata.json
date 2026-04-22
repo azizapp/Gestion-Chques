@@ -1,0 +1,7 @@
+{
+  "name": "GestionChèques",
+  "description": "Une application web professionnelle pour la gestion des chèques entrants et sortants, conçue pour les entreprises et les comptables.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
