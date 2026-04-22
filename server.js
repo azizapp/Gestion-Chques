@@ -6,9 +6,9 @@ const { transform } = require('sucrase');
 require('dotenv').config({ path: '.env.local' });
 require('dotenv').config();
 
-// Fallback: Map GEMINI_API_KEY to API_KEY if API_KEY is missing
-if (!process.env.API_KEY && process.env.GEMINI_API_KEY) {
-  process.env.API_KEY = process.env.GEMINI_API_KEY;
+// Fallback: Map VITE_GEMINI_API_KEY to API_KEY if API_KEY is missing
+if (!process.env.API_KEY && process.env.VITE_GEMINI_API_KEY) {
+  process.env.API_KEY = process.env.VITE_GEMINI_API_KEY;
 }
 
 const app = express();
@@ -64,6 +64,19 @@ app.use((req, res, next) => {
           const val = process.env[key] || '';
           const regex = new RegExp(`process\\.env\\.${key}`, 'g');
           code = code.replace(regex, JSON.stringify(val));
+        });
+
+        // Inject import.meta.env.VITE_* variables used by client-side code
+        const viteEnvMap = {
+          'VITE_GEMINI_API_KEY': process.env.VITE_GEMINI_API_KEY || process.env.API_KEY || '',
+          'VITE_SUPABASE_URL': process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '',
+          'VITE_SUPABASE_ANON_KEY': process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '',
+        };
+        Object.entries(viteEnvMap).forEach(([key, val]) => {
+          code = code.replace(
+            new RegExp(`import\\.meta\\.env\\.${key}`, 'g'),
+            JSON.stringify(val)
+          );
         });
 
         // Save to cache

@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// New Supabase project details provided by user
-const supabaseUrl = 'https://isvhmsatlnwykmwukurh.supabase.co';
-const supabaseAnonKey = 'sb_publishable_4lFHcw3ymRZBCN_tlmCE7Q_pW_qhaS1';
+// Supabase project details - reads from env vars with hardcoded fallbacks
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://isvhmsatlnwykmwukurh.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_4lFHcw3ymRZBCN_tlmCE7Q_pW_qhaS1';
 
 export const isConfigured = true;
 
