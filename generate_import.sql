@@ -1,0 +1,20 @@
+-- ============================================
+-- IMPORT CHECKS DATA FROM BACKUP
+-- ============================================
+-- Run these chunks in order in Supabase SQL Editor
+-- Each chunk contains 50 rows (except the last one)
+--
+-- Files location:
+-- C:\Users\aziz\OneDrive\Desktop\New folder (5)\chunks\
+--
+-- Run in this order:
+-- 1. checks_chunk_001.sql
+-- 2. checks_chunk_002.sql
+-- 3. checks_chunk_003.sql
+-- 4. checks_chunk_004.sql
+-- 5. checks_chunk_005.sql
+--
+-- Verify after all:
+-- SELECT COUNT(*) FROM public.checks;
+
+-- Total rows: 232 checks (split into 5 chunks)
