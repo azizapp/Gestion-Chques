@@ -15,7 +15,7 @@ import { supabase, isConfigured } from './supabase.ts';
 import { Loader2, Bell, CheckCheck } from 'lucide-react';
 
 const DEFAULT_SETTINGS: SystemSettings = {
-  company_name: 'FINANSSE PRO',
+  company_name: 'CHIQUE PRO',
   currency: 'MAD',
   timezone: 'Africa/Casablanca',
   date_format: 'DD/MM/YYYY',
