@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Camera, Save, Globe, Building2, Bell, Shield, Coins, Smartphone, CalendarDays, Loader2, Building } from 'lucide-react';
+import { Camera, Save, Globe, Building2, Bell, Shield, Coins, Smartphone, CalendarDays, Loader2, Building, Eye, EyeOff, Key, BrainCircuit } from 'lucide-react';
 import { SystemSettings } from '../types.ts';
 
 interface SettingsProps {
@@ -11,6 +11,7 @@ interface SettingsProps {
 const Settings: React.FC<SettingsProps> = ({ settings, onSave }) => {
   const [localSettings, setLocalSettings] = useState<SystemSettings>(settings);
   const [saving, setSaving] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -185,6 +186,62 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSave }) => {
                <p className="text-[10px] font-black text-white/80 uppercase tracking-widest">Sécurité Redondante</p>
                <p className="text-[9px] text-white/20 uppercase font-medium">Notifications chiffrées de bout en bout</p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* API Key Configuration Card */}
+      <div className="glass-card p-10 rounded-[2.5rem] border-white/5 shadow-2xl space-y-10">
+        <div className="flex items-center gap-4 text-gold">
+          <BrainCircuit size={24} />
+          <h4 className="text-sm font-black tracking-[0.2em] uppercase">INTELLIGENCE ARTIFICIELLE</h4>
+        </div>
+
+        <div className="space-y-8">
+          <div className="p-6 bg-gold/5 border border-gold/10 rounded-2xl">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-gold/10 rounded-xl">
+                <Key size={20} className="text-gold" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white text-xs font-bold tracking-tight mb-2">Clé API Gemini</p>
+                <p className="text-white/30 text-[9px] font-medium leading-relaxed">
+                  Nécessaire pour les fonctionnalités IA : extraction OCR des chèques, analyse de portefeuille, et intelligence de marché.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-white/30 tracking-widest ml-1">CLÉ API GEMINI</label>
+            <div className="relative group">
+              <input 
+                type={showApiKey ? 'text' : 'password'}
+                value={localSettings.gemini_api_key || ''} 
+                onChange={e => setLocalSettings({...localSettings, gemini_api_key: e.target.value})} 
+                placeholder="AIza..."
+                className="w-full bg-[#0A0D18] border border-white/5 rounded-2xl py-4 px-6 pr-14 text-white text-sm font-mono outline-none focus:border-gold/30 transition-all placeholder:text-white/10" 
+              />
+              <button 
+                type="button"
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-gold transition-colors"
+              >
+                {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-4">
+            <div className="flex-1 h-px bg-white/5" />
+            <a 
+              href="https://aistudio.google.com/apikey" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[9px] font-bold text-gold hover:underline uppercase tracking-widest"
+            >
+              Obtenir une clé API →
+            </a>
           </div>
         </div>
       </div>

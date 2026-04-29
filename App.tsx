@@ -24,7 +24,8 @@ const DEFAULT_SETTINGS: SystemSettings = {
   alert_delay: true,
   alert_method: 'app',
   alert_days: 3,
-  logo_url: ''
+  logo_url: '',
+  gemini_api_key: ''
 };
 
 const DEFAULT_FAVICON = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>P</text></svg>';
@@ -46,7 +47,12 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<SystemSettings>(() => {
     try {
       const cached = localStorage.getItem('finansse_settings_cache');
-      return cached ? { ...DEFAULT_SETTINGS, ...JSON.parse(cached) } : DEFAULT_SETTINGS;
+      const storedSettings = cached ? { ...DEFAULT_SETTINGS, ...JSON.parse(cached) } : DEFAULT_SETTINGS;
+      // Load Gemini API key from localStorage if not in settings
+      if (!storedSettings.gemini_api_key) {
+        storedSettings.gemini_api_key = localStorage.getItem('finansse_gemini_api_key') || '';
+      }
+      return storedSettings;
     } catch { return DEFAULT_SETTINGS; }
   });
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -118,6 +124,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem('finansse_settings_cache', JSON.stringify(settings));
+    // Also save Gemini API key separately for the AI service
+    if (settings.gemini_api_key) {
+      localStorage.setItem('finansse_gemini_api_key', settings.gemini_api_key);
+    } else {
+      localStorage.removeItem('finansse_gemini_api_key');
+    }
   }, [settings]);
 
   useEffect(() => {

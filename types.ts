@@ -71,6 +71,7 @@ export interface SystemSettings {
   alert_method: string;
   alert_days: number;
   logo_url: string;
+  gemini_api_key?: string;
 }
 
 export type AppTab = 'dash' | 'checks' | 'dueToday' | 'dueTomorrow' | 'dueWeek' | 'performance' | 'risks' | 'parameters';

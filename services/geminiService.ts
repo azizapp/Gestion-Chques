@@ -1,12 +1,35 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+// Get API key from localStorage (set by Settings) or environment variable
+const getApiKey = () => {
+  try {
+    const storedKey = localStorage.getItem('finansse_gemini_api_key');
+    if (storedKey) return storedKey;
+  } catch (e) {}
+  return import.meta.env.VITE_GEMINI_API_KEY || '';
+};
+
+let aiInstance: GoogleGenAI | null = null;
+
+const getAi = () => {
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+};
+
+// Function to refresh AI instance when API key changes
+export const refreshAiInstance = () => {
+  aiInstance = null;
+};
 
 /**
  * OCR extraction for check images using Flash model
  */
 export const extractCheckData = async (base64Image: string) => {
+  const ai = getAi();
   if (!ai) {
     console.warn('Gemini API key not configured. OCR feature disabled.');
     return null;
@@ -61,6 +84,7 @@ export const extractCheckData = async (base64Image: string) => {
  * Deep Portfolio Analysis using Pro model with Thinking capability
  */
 export const analyzePortfolioStrategically = async (checks: any[]) => {
+  const ai = getAi();
   if (!ai) {
     console.warn('Gemini API key not configured. Portfolio analysis disabled.');
     return "L'analyse IA nécessite une clé API Gemini. Veuillez configurer votre clé API dans les paramètres.";
@@ -99,6 +123,7 @@ export const analyzePortfolioStrategically = async (checks: any[]) => {
  * Get Market Intel using Google Search Grounding
  */
 export const getMarketIntel = async (currency: string = 'MAD') => {
+  const ai = getAi();
   if (!ai) {
     console.warn('Gemini API key not configured. Market intel disabled.');
     return {
