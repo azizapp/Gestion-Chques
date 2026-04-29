@@ -74,4 +74,4 @@ export interface SystemSettings {
   gemini_api_key?: string;
 }
 
-export type AppTab = 'dash' | 'checks' | 'dueToday' | 'dueTomorrow' | 'dueWeek' | 'performance' | 'risks' | 'parameters';
+export type AppTab = 'dash' | 'checks' | 'dueToday' | 'dueTomorrow' | 'dueWeek' | 'performance' | 'risks' | 'parameters' | 'users';

@@ -14,7 +14,8 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Users
 } from 'lucide-react';
 import { AppTab } from '../types.ts';
 
@@ -54,20 +55,17 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'performance', label: 'Rapports', icon: BarChart3 },
     { id: 'risks', label: 'Sécurité & Risques', icon: ShieldX },
     { id: 'parameters', label: 'Paramètres', icon: Settings },
+    { id: 'users', label: 'Utilisateurs', icon: Users },
   ];
 
   // Filter items based on user permissions
   const menuItems = allMenuItems.filter(item => {
-    if (isRestrictedUser) {
-      // Restricted users: Chèques, À Payer Aujourd'hui, À Payer Demain, and Cette Semaine
-      return (
-        item.id === 'checks' ||
-        item.id === 'dueToday' ||
-        item.id === 'dueTomorrow' ||
-        item.id === 'dueWeek'
-      );
-    }
-    return true; // Admin and others see everything
+    if (item.id === 'users' && !isAdmin) return false; // Only admins see user management
+    if (item.id === 'dash' && isRestrictedUser) return false;
+    if (item.id === 'performance' && isRestrictedUser) return false;
+    if (item.id === 'parameters' && isRestrictedUser) return false;
+    if (item.id === 'risks' && isRestrictedUser) return false;
+    return true;
   });
 
   return (

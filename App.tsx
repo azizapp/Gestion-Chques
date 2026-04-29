@@ -7,6 +7,7 @@ import DueChecks from './components/DueChecks.tsx';
 import Reports from './components/Reports.tsx';
 import RiskIntelligence from './components/RiskIntelligence.tsx';
 import Settings from './components/Settings.tsx';
+import UserManagement from './components/UserManagement.tsx';
 import CheckModal from './components/CheckModal.tsx';
 import Auth from './components/Auth.tsx';
 import MobileLayout from './mobile/MobileLayout.tsx';
@@ -87,9 +88,9 @@ const App: React.FC = () => {
       });
   }, [session, isConfigured]);
 
+  // Allowed tabs for restricted users
   useEffect(() => {
     if (isRestrictedUser) {
-      // Restricted users: Chèques, À Payer Aujourd'hui, À Payer Demain, and Cette Semaine
       const allowed = ['checks', 'dueToday', 'dueTomorrow', 'dueWeek'];
       if (!allowed.includes(activeTab)) {
         setActiveTab('checks');
@@ -486,6 +487,7 @@ const App: React.FC = () => {
             />
           )}
           {activeTab === 'parameters' && !isRestrictedUser && <Settings settings={settings} onSave={handleSaveSettings} />}
+                    {activeTab === 'users' && isAdmin && <UserManagement userRole={userRole} />}
         </div>
       </main>
 
