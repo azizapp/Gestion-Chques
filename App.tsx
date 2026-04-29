@@ -64,7 +64,7 @@ const App: React.FC = () => {
 
   const userEmail = session?.user?.email;
   const isAdmin = userEmail === 'admin@apollo.com';
-  const isRestrictedUser = userEmail === 'user@apollo.com';
+  const isRestrictedUser = userEmail === 'user@apollo.com' || userEmail === 'dounia@apolloeyewear.ma' || userEmail === 'hamza@apolloeyewear.ma';
   
   // Is Manager: can see ALL checks (Admin or the special user)
   const isManager = isAdmin || isRestrictedUser;

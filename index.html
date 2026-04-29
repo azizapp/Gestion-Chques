@@ -67,10 +67,10 @@
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
     <script>
-      // Simple Service Worker registration to help keep the app "warm"
+      // Service Worker registration - silently fails if not supported
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
         });
       }
     </script>

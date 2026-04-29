@@ -47,7 +47,9 @@ CREATE POLICY "Checks access policy" ON public.checks
     FOR ALL USING (
         auth.uid() = created_by OR 
         (auth.jwt() ->> 'email') = 'admin@apollo.com' OR 
-        (auth.jwt() ->> 'email') = 'user@apollo.com'
+        (auth.jwt() ->> 'email') = 'user@apollo.com' OR
+        (auth.jwt() ->> 'email') = 'dounia@apolloeyewear.ma' OR
+        (auth.jwt() ->> 'email') = 'hamza@apolloeyewear.ma'
     );
 
 -- 5. Updated Policies for settings

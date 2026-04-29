@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   setIsCollapsed
 }) => {
   const isAdmin = userEmail === 'admin@apollo.com';
-  const isRestrictedUser = userEmail === 'user@apollo.com';
+  const isRestrictedUser = userEmail === 'user@apollo.com' || userEmail === 'dounia@apolloeyewear.ma' || userEmail === 'hamza@apolloeyewear.ma';
   
   const allMenuItems: { id: AppTab; label: string; icon: any }[] = [
     { id: 'dash', label: 'Tableau de bord', icon: LayoutDashboard },
