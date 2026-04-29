@@ -1,9 +1,14 @@
 
 import React, { useState } from 'react';
-import { supabase } from '../supabase.ts';
 import { ShieldCheck, Loader2, Mail, Key, UserPlus, LogIn } from 'lucide-react';
+import { supabase } from '../supabase.ts';
+import { hashPassword, verifyPassword, saveSession } from '../services/auth.ts';
 
-const Auth: React.FC = () => {
+interface AuthProps {
+  onAuthSuccess: (session: { userId: string; email: string; role: string }) => void;
+}
+
+const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,16 +16,84 @@ const Auth: React.FC = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase) return;
+    if (!supabase) {
+      alert('Database not configured');
+      return;
+    }
     setLoading(true);
+
     try {
-      const { error } = isSignUp 
-        ? await supabase.auth.signUp({ email, password })
-        : await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      if (isSignUp) alert('Compte créé avec succès ! Connectez-vous.');
+      if (isSignUp) {
+        // Sign Up - Hash password and create user
+        const passwordHash = await hashPassword(password);
+        
+        const { error } = await supabase.from('users_check').insert({
+          email: email,
+          password_hash: passwordHash,
+          role: 'user',
+          is_active: true,
+          is_verified: true
+        });
+
+        if (error) {
+          if (error.message.includes('duplicate')) {
+            alert('Cet email existe déjà!');
+          } else {
+            throw error;
+          }
+          return;
+        }
+
+        alert('Compte créé! Vous pouvez vous connecter.');
+        setIsSignUp(false);
+      } else {
+        // Login - Verify password
+        const { data: users, error } = await supabase
+          .from('users_check')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!users) {
+          alert('Email ou mot de passe incorrect');
+          return;
+        }
+
+        if (!users.is_active) {
+          alert('Votre compte est désactivé');
+          return;
+        }
+
+        const isValid = await verifyPassword(password, users.password_hash);
+        if (!isValid) {
+          alert('Email ou mot de passe incorrect');
+          return;
+        }
+
+        // Update last login
+        await supabase
+          .from('users_check')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', users.id);
+
+        // Save session
+        saveSession({
+          userId: users.id,
+          email: users.email,
+          role: users.role,
+          loginTime: new Date().toISOString()
+        });
+
+        onAuthSuccess({
+          userId: users.id,
+          email: users.email,
+          role: users.role
+        });
+      }
     } catch (error: any) {
-      alert(error.message);
+      console.error('Auth error:', error);
+      alert(error.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
@@ -33,7 +106,7 @@ const Auth: React.FC = () => {
           <div className="w-14 h-14 rounded-[12px] bg-transparent border border-gold/30 flex items-center justify-center mb-6 shadow-2xl shadow-gold/5">
             <ShieldCheck className="text-gold" size={28} />
           </div>
-          <h1 className="text-[22px] font-bold leading-[33px] italic tracking-tight mb-1 text-white uppercase">FINANSSE PRO</h1>
+          <h1 className="text-[22px] font-bold leading-[33px] italic tracking-tight mb-1 text-white uppercase">CHIQUE PRO</h1>
           <p className="text-white/30 text-[9px] uppercase tracking-[0.2em] font-bold">
             {isSignUp ? 'Enregistrement Sécurisé' : 'Accès au Coffre-fort'}
           </p>
@@ -41,7 +114,7 @@ const Auth: React.FC = () => {
 
         <form onSubmit={handleAuth} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[9px] font-bold uppercase tracking-widest text-white/30 ml-1">E-mail Professionnel</label>
+            <label className="text-[9px] font-bold uppercase tracking-widest text-white/30 ml-1">E-mail</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-gold/50 transition-colors" size={16} />
               <input 
@@ -55,12 +128,13 @@ const Auth: React.FC = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[9px] font-bold uppercase tracking-widest text-white/30 ml-1">Clé d'Accès</label>
+            <label className="text-[9px] font-bold uppercase tracking-widest text-white/30 ml-1">Mot de Passe</label>
             <div className="relative group">
               <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-gold/50 transition-colors" size={16} />
               <input 
                 type="password" 
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-white/[0.02] border border-white/5 rounded-[12px] py-3.5 pl-11 pr-5 text-xs font-medium focus:border-gold/30 outline-none transition-all placeholder:text-white/5"
@@ -101,7 +175,7 @@ const Auth: React.FC = () => {
 
         <div className="mt-10 pt-6 border-t border-white/5 text-center">
           <p className="text-[8px] text-white/10 font-medium tracking-widest uppercase">
-            Protocole AES-256 actif
+            Authentification Sécurisée
           </p>
         </div>
       </div>

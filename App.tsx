@@ -13,6 +13,7 @@ import Auth from './components/Auth.tsx';
 import MobileLayout from './mobile/MobileLayout.tsx';
 import { AppTab, Check, SystemSettings, CheckStatus, AppNotification } from './types.ts';
 import { supabase, isConfigured } from './supabase.ts';
+import { getSession, clearSession, Session } from './services/auth.ts';
 import { Loader2, Bell, CheckCheck } from 'lucide-react';
 
 const DEFAULT_SETTINGS: SystemSettings = {
@@ -32,7 +33,8 @@ const DEFAULT_SETTINGS: SystemSettings = {
 const DEFAULT_FAVICON = '/imag/A2.ico';
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [userRole, setUserRole] = useState<string>('user');
   const [activeTab, setActiveTab] = useState<AppTab>(() => {
     return (localStorage.getItem('finansse_active_tab') as AppTab) || 'dash';
   });
@@ -63,30 +65,22 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
-  const [userRole, setUserRole] = useState<string>('user');
-
-  const userEmail = session?.user?.email;
+  const userEmail = session?.email;
   
-  // Role-based access: get role from users_check table
+  // Role-based access
   const isAdmin = userRole === 'admin';
   const isManager = userRole === 'admin' || userRole === 'manager';
   const isRestrictedUser = userRole === 'user';
 
-  // Fetch user role from users_check table
+  // Load session from localStorage on mount
   useEffect(() => {
-    if (!session || !isConfigured) return;
-    
-    supabase
-      .from('users_check')
-      .select('role')
-      .eq('user_id', session.user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.role) {
-          setUserRole(data.role);
-        }
-      });
-  }, [session, isConfigured]);
+    const savedSession = getSession();
+    if (savedSession) {
+      setSession(savedSession);
+      setUserRole(savedSession.role);
+    }
+    setLoading(false);
+  }, []);
 
   // Allowed tabs for restricted users
   useEffect(() => {
@@ -163,16 +157,7 @@ const App: React.FC = () => {
     });
   }, [checks, addNotification]);
 
-  useEffect(() => {
-    if (!isConfigured) return;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+  // Removed Supabase auth subscription - using standalone auth
 
   const syncWithServer = useCallback(async () => {
     if (!session || !isConfigured) return;
@@ -186,10 +171,10 @@ const App: React.FC = () => {
       // Exclude image_url from main fetch to prevent DB statement timeout on large base64 data
       let checksQuery = supabase.from('checks').select('id,check_number,bank_name,amount,issue_date,due_date,entity_name,type,status,notes,created_at,fund_name,amount_in_words,created_by');
       
-      // FEATURE: If user is a manager (admin or user@apollo.com), fetch ALL checks
+      // FEATURE: If user is a manager, fetch ALL checks
       // Otherwise, only fetch checks created by the current user
       if (!isManager) {
-        checksQuery = checksQuery.eq('created_by', session.user.id);
+        checksQuery = checksQuery.eq('created_by', session.userId);
       }
 
       const [checksRes, settingsRes] = await Promise.all([
@@ -197,7 +182,7 @@ const App: React.FC = () => {
         supabase
           .from('cheque_settings')
           .select('*')
-          .eq('user_id', session.user.id)
+          .eq('user_id', session.userId)
           .maybeSingle()
       ]);
 
@@ -244,7 +229,7 @@ const App: React.FC = () => {
     if (isConfigured && session) {
       const { error } = await supabase.from('cheque_settings').upsert({
         ...newSettings,
-        user_id: session.user.id,
+        user_id: session.userId,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
       if (error) {
@@ -261,7 +246,7 @@ const App: React.FC = () => {
       if (isEditing) {
         await supabase.from('checks').update({ ...checkData }).eq('id', editingCheck.id);
       } else {
-        await supabase.from('checks').insert({ ...checkData, created_by: session.user.id });
+        await supabase.from('checks').insert({ ...checkData, created_by: session.userId });
       }
       syncWithServer();
     }
@@ -352,7 +337,10 @@ const App: React.FC = () => {
     </div>
   );
 
-  if (!session) return <Auth />;
+  if (!session) return <Auth onAuthSuccess={(newSession) => {
+    setSession(newSession);
+    setUserRole(newSession.role);
+  }} />;
 
   if (isMobile) {
     return (
@@ -365,8 +353,8 @@ const App: React.FC = () => {
         onDeleteCheck={handleDeleteCheck}
         onMarkAsPaid={handleMarkAsPaid}
         onLogout={() => {
-          localStorage.clear();
-          supabase.auth.signOut();
+          clearSession();
+          setSession(null);
         }}
         isAdmin={isManager}
         userEmail={userEmail}
@@ -382,10 +370,10 @@ const App: React.FC = () => {
         companyName={settings.company_name}
         logoUrl={settings.logo_url}
         onLogout={() => {
-          localStorage.clear();
-          supabase.auth.signOut();
+          clearSession();
+          setSession(null);
         }}
-        userEmail={session.user.email}
+        userEmail={session?.email}
         userRole={userRole}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
