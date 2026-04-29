@@ -4,10 +4,10 @@
 -- ============================================
 
 -- 1. Drop existing tables and triggers (if any)
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS on_user_login ON auth.users;
-DROP FUNCTION IF EXISTS handle_new_user();
-DROP FUNCTION IF EXISTS update_last_login();
+DROP TRIGGER IF EXISTS on_auth_user_signup ON auth.users;
+DROP TRIGGER IF EXISTS on_auth_user_login ON auth.users;
+DROP FUNCTION IF EXISTS handle_new_user_signup();
+DROP FUNCTION IF EXISTS handle_login();
 DROP TABLE IF EXISTS public.users_check CASCADE;
 DROP TABLE IF EXISTS public.checks CASCADE;
 DROP TABLE IF EXISTS public.cheque_settings CASCADE;
@@ -182,5 +182,21 @@ FROM public.users_check u;
 -- Grant access to view
 GRANT SELECT ON public.admin_users TO authenticated;
 
+-- ============================================
+-- PRE-CREATED USERS (for demo purposes)
+-- ============================================
+-- NOTE: These users must sign up in the app first to be created in auth.users
+-- The trigger will auto-assign their roles based on their emails
+--
+-- ADMIN: hamza@apolloeyewear.ma (password: hamzahamza)
+-- MANAGER: alfarisse100@gmail.com (password: alfarissealfarisse)
+-- USER: dounia@apolloeyewear.ma (password: douniadounia)
+--
+-- Users will get their roles automatically when they sign up!
+
 -- 15. Success message
 SELECT 'User Management System Setup Complete!' as status;
+SELECT 'Ready for users to sign up:' as info;
+SELECT 'ADMIN: hamza@apolloeyewear.ma (hamzahamza)' as admin_user;
+SELECT 'MANAGER: alfarisse100@gmail.com (alfarissealfarisse)' as manager_user;
+SELECT 'USER: dounia@apolloeyewear.ma (douniadounia)' as regular_user;
