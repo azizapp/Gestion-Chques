@@ -130,34 +130,37 @@ GRANT SELECT ON public.admin_users TO anon, authenticated;
 -- Run this separately AFTER the tables are created
 
 -- ADMIN USER
-INSERT INTO public.users_check (email, password_hash, role, is_active, is_verified)
+INSERT INTO public.users_check (id, email, password_hash, role, is_active, is_verified)
 VALUES (
+    gen_random_uuid(),
     'hamza@apolloeyewear.ma',
-    '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',  -- hamzahamza
+    '929198c065dabae65511932f9342e93ac052d30d53a05e4cce8943a09b29109c',
     'admin',
     true,
     true
-) ON CONFLICT (email) DO UPDATE SET password_hash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+) ON CONFLICT (email) DO UPDATE SET password_hash = '929198c065dabae65511932f9342e93ac052d30d53a05e4cce8943a09b29109c', role = 'admin';
 
 -- MANAGER USER
-INSERT INTO public.users_check (email, password_hash, role, is_active, is_verified)
+INSERT INTO public.users_check (id, email, password_hash, role, is_active, is_verified)
 VALUES (
+    gen_random_uuid(),
     'alfarisse100@gmail.com',
-    '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',  -- alfarissealfarisse
+    '09933b66fe7883111a8fa233ae2b5f75b137aa53df8f99cc2cbc3cb62329a8e9',
     'manager',
     true,
     true
-) ON CONFLICT (email) DO UPDATE SET password_hash = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+) ON CONFLICT (email) DO UPDATE SET password_hash = '09933b66fe7883111a8fa233ae2b5f75b137aa53df8f99cc2cbc3cb62329a8e9', role = 'manager';
 
 -- REGULAR USER
-INSERT INTO public.users_check (email, password_hash, role, is_active, is_verified)
+INSERT INTO public.users_check (id, email, password_hash, role, is_active, is_verified)
 VALUES (
+    gen_random_uuid(),
     'dounia@apolloeyewear.ma',
-    '7c60b23f0bd4e7a36d5312c8f39a8d7f2b5e7f3d7c8a9e6b5d4c3b2a1908070605',  -- douniadounia
+    'fbd47be85dc5f66ceab5190c8378156605433fb9bce1cc943f75b55fba688cb4',
     'user',
     true,
     true
-) ON CONFLICT (email) DO UPDATE SET password_hash = '7c60b23f0bd4e7a36d5312c8f39a8d7f2b5e7f3d7c8a9e6b5d4c3b2a1908070605';
+) ON CONFLICT (email) DO UPDATE SET password_hash = 'fbd47be85dc5f66ceab5190c8378156605433fb9bce1cc943f75b55fba688cb4', role = 'user';
 
 -- 15. Success message
 SELECT 'Standalone Authentication Setup Complete!' as status;
