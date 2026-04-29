@@ -15,19 +15,19 @@ DROP TABLE IF EXISTS public.cheque_settings CASCADE;
 -- 2. Create users_check table for user management
 CREATE TABLE public.users_check (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID UNIQUE,  -- Links to auth.users (can be NULL until user signs up)
+    user_id UUID UNIQUE,  -- Links to auth.users (NO CASCADE)
     email TEXT NOT NULL UNIQUE,
-    password_hash TEXT,   -- For admin-created users
+    password_hash TEXT,
     role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'manager', 'user')),
     is_active BOOLEAN DEFAULT true,
     is_verified BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT now(),
-    created_by UUID,
+    created_by UUID,  -- NO CASCADE
     last_login TIMESTAMPTZ,
     metadata JSONB DEFAULT '{}'::jsonb
 );
 
--- 3. Create checks table
+-- 3. Create checks table (NO CASCADE DELETE - data is preserved)
 CREATE TABLE public.checks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     check_number TEXT NOT NULL,
@@ -43,12 +43,12 @@ CREATE TABLE public.checks (
     notes TEXT,
     fund_name TEXT,
     amount_in_words TEXT,
-    created_by UUID REFERENCES auth.users(id) ON DELETE CASCADE
+    created_by UUID  -- NO CASCADE - data stays even if user is deleted
 );
 
--- 4. Create cheque_settings table
+-- 4. Create cheque_settings table (NO CASCADE DELETE)
 CREATE TABLE public.cheque_settings (
-    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID PRIMARY KEY,  -- NO CASCADE - stays even if user deleted
     company_name TEXT DEFAULT 'CHIQUE PRO',
     currency TEXT DEFAULT 'MAD',
     timezone TEXT DEFAULT 'Africa/Casablanca',
