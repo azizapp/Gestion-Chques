@@ -71,8 +71,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (isRestrictedUser) {
-      // Allow restricted users to use checks, risks and the new due-pages
-      const allowed = ['checks', 'risks', 'dueToday', 'dueTomorrow', 'dueWeek'];
+      // Restricted users: only Chèques, À Payer Aujourd'hui, and Cette Semaine
+      const allowed = ['checks', 'dueToday', 'dueWeek'];
       if (!allowed.includes(activeTab)) {
         setActiveTab('checks');
       }

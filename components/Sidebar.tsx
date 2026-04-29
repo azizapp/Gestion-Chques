@@ -56,12 +56,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   // Filter items based on user permissions
   const menuItems = allMenuItems.filter(item => {
     if (isRestrictedUser) {
-      // Allow restricted users to see checks, risks and the new due-pages
+      // Restricted users: only Chèques, À Payer Aujourd'hui, and Cette Semaine
       return (
         item.id === 'checks' ||
-        item.id === 'risks' ||
         item.id === 'dueToday' ||
-        item.id === 'dueTomorrow' ||
         item.id === 'dueWeek'
       );
     }
