@@ -46,8 +46,7 @@ DROP POLICY IF EXISTS "Users can manage their own checks" ON public.checks;
 CREATE POLICY "Checks access policy" ON public.checks 
     FOR ALL USING (
         auth.uid() = created_by OR 
-        (auth.jwt() ->> 'email') = 'admin@apollo.com' OR 
-        (auth.jwt() ->> 'email') = 'user@apollo.com' OR
+        
         (auth.jwt() ->> 'email') = 'dounia@apolloeyewear.ma' OR
         (auth.jwt() ->> 'email') = 'hamza@apolloeyewear.ma'
     );
@@ -58,5 +57,5 @@ DROP POLICY IF EXISTS "Users can manage their own settings" ON public.cheque_set
 CREATE POLICY "Settings access policy" ON public.cheque_settings 
     FOR ALL USING (
         auth.uid() = user_id OR 
-        (auth.jwt() ->> 'email') = 'admin@apollo.com'
+        (auth.jwt() ->> 'email') = 'hamza@apolloeyewear.ma'
     );

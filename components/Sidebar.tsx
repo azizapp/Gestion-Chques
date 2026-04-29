@@ -25,6 +25,7 @@ interface SidebarProps {
   logoUrl: string;
   onLogout: () => void;
   userEmail?: string;
+  userRole?: string;
   isCollapsed: boolean;
   setIsCollapsed: (val: boolean) => void;
 }
@@ -36,11 +37,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   logoUrl, 
   onLogout, 
   userEmail,
+  userRole = 'user',
   isCollapsed,
   setIsCollapsed
 }) => {
-  const isAdmin = userEmail === 'admin@apollo.com';
-  const isRestrictedUser = userEmail === 'user@apollo.com' || userEmail === 'dounia@apolloeyewear.ma' || userEmail === 'hamza@apolloeyewear.ma';
+  const isAdmin = userRole === 'admin';
+  const isManager = userRole === 'admin' || userRole === 'manager';
+  const isRestrictedUser = userRole === 'user';
   
   const allMenuItems: { id: AppTab; label: string; icon: any }[] = [
     { id: 'dash', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -106,15 +109,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <ShieldAlert size={9} className="text-gold" />
                 <span className="text-[8px] font-bold text-gold uppercase tracking-widest">Admin</span>
               </div>
-            ) : isRestrictedUser ? (
-               <div className="flex items-center gap-1.5 px-2 py-1 rounded-[6px] bg-blue-500/10 border border-blue-500/20 w-fit">
-                <ShieldCheck size={9} className="text-blue-400" />
-                <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Restreint</span>
+            ) : isManager && !isRestrictedUser ? (
+               <div className="flex items-center gap-1.5 px-2 py-1 rounded-[6px] bg-purple-500/10 border border-purple-500/20 w-fit">
+                <ShieldAlert size={9} className="text-purple-400" />
+                <span className="text-[8px] font-bold text-purple-400 uppercase tracking-widest">Manager</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 w-fit">
-                <ShieldCheck size={9} className="text-emerald-400" />
-                <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest">User</span>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-[6px] bg-blue-500/10 border border-blue-500/20 w-fit">
+                <ShieldCheck size={9} className="text-blue-400" />
+                <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">User</span>
               </div>
             )}
           </div>

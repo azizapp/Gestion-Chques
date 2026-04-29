@@ -62,12 +62,30 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
+  const [userRole, setUserRole] = useState<string>('user');
+
   const userEmail = session?.user?.email;
-  const isAdmin = userEmail === 'admin@apollo.com';
-  const isRestrictedUser = userEmail === 'user@apollo.com' || userEmail === 'dounia@apolloeyewear.ma' || userEmail === 'hamza@apolloeyewear.ma';
   
-  // Is Manager: can see ALL checks (Admin or the special user)
-  const isManager = isAdmin || isRestrictedUser;
+  // Role-based access: get role from users_check table
+  const isAdmin = userRole === 'admin';
+  const isManager = userRole === 'admin' || userRole === 'manager';
+  const isRestrictedUser = userRole === 'user';
+
+  // Fetch user role from users_check table
+  useEffect(() => {
+    if (!session || !isConfigured) return;
+    
+    supabase
+      .from('users_check')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.role) {
+          setUserRole(data.role);
+        }
+      });
+  }, [session, isConfigured]);
 
   useEffect(() => {
     if (isRestrictedUser) {
@@ -367,6 +385,7 @@ const App: React.FC = () => {
           supabase.auth.signOut();
         }}
         userEmail={session.user.email}
+        userRole={userRole}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
       />
